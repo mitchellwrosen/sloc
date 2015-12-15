@@ -1,0 +1,7 @@
+- pattern: sloc.cabal.hs
+  commands:
+  - stack runghc \0 > sloc.cabal
+  - stack build
+
+- pattern: Main.hs
+  command: stack build

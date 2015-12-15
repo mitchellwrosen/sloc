@@ -1,0 +1,28 @@
+-- This Cabal file generated using the Cartel library.
+-- Cartel is available at:
+-- http://www.github.com/massysett/cartel
+--
+-- Script name used to generate: sloc.cabal.hs
+-- Generated on: 2015-12-14 21:49:03.735061 PST
+-- Cartel library version: 0.14.2.8
+
+name: sloc
+version: 0.1.0.0
+cabal-version: >= 1.8
+build-type: Simple
+
+Executable sloc
+  main-is: Main.hs
+  build-depends:
+      base
+    , bytestring
+    , containers
+    , directory
+    , extra
+    , filepath
+    , foldl
+    , streaming
+    , unix
+  ghc-options:
+    -Wall
+    -O2
