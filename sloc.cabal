@@ -1,18 +1,16 @@
--- This Cabal file generated using the Cartel library.
--- Cartel is available at:
--- http://www.github.com/massysett/cartel
+-- This file has been generated from package.yaml by hpack version 0.9.0.
 --
--- Script name used to generate: sloc.cabal.hs
--- Generated on: 2015-12-14 21:49:03.735061 PST
--- Cartel library version: 0.14.2.8
+-- see: https://github.com/sol/hpack
 
-name: sloc
-version: 0.1.0.0
-cabal-version: >= 1.8
-build-type: Simple
+name:           sloc
+version:        0.1.0.0
+license-file:   LICENSE
+cabal-version:  >= 1.10
+build-type:     Simple
 
-Executable sloc
+executable sloc
   main-is: Main.hs
+  ghc-options: -Wall -O2
   build-depends:
       base
     , bytestring
@@ -23,6 +21,4 @@ Executable sloc
     , foldl
     , streaming
     , unix
-  ghc-options:
-    -Wall
-    -O2
+  default-language: Haskell2010

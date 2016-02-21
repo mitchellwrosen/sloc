@@ -1,0 +1,17 @@
+name: sloc
+version: 0.1.0.0
+
+executables:
+  sloc:
+    main: Main.hs
+    dependencies:
+      - base
+      - bytestring
+      - containers
+      - directory
+      - extra
+      - filepath
+      - foldl
+      - streaming
+      - unix
+    ghc-options: -Wall -O2
