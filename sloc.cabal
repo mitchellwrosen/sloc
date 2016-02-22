@@ -8,17 +8,34 @@ license-file:   LICENSE
 cabal-version:  >= 1.10
 build-type:     Simple
 
+library
+  hs-source-dirs:
+      src
+  ghc-options: -Wall
+  build-depends:
+      base
+    , bytestring
+    , streaming
+    , extra
+    , unix
+  exposed-modules:
+      Streaming.Filesystem
+  other-modules:
+      Paths_sloc
+  default-language: Haskell2010
+
 executable sloc
   main-is: Main.hs
   ghc-options: -Wall -O2
   build-depends:
       base
     , bytestring
+    , streaming
     , containers
     , directory
     , extra
     , filepath
     , foldl
-    , streaming
+    , sloc
     , unix
   default-language: Haskell2010

@@ -1,17 +1,30 @@
 name: sloc
 version: 0.1.0.0
 
+ghc-options: -Wall
+
+dependencies:
+  - base
+  - bytestring
+  - streaming
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - Streaming.Filesystem
+  dependencies:
+    - extra
+    - unix
+
 executables:
   sloc:
     main: Main.hs
     dependencies:
-      - base
-      - bytestring
       - containers
       - directory
       - extra
       - filepath
       - foldl
-      - streaming
+      - sloc
       - unix
-    ghc-options: -Wall -O2
+    ghc-options: -O2
