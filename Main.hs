@@ -21,21 +21,30 @@ import qualified Data.Map              as M
 import qualified Streaming.Prelude     as S
 
 main :: IO ()
-main = runResourceT (S.mconcat_ (S.mapM sloc filenames)) >>= prettyPrintSummary
+main = do
+  counts <- runResourceT
+              (S.foldM_ (\acc path -> (M.unionWith (+) acc) <$> sloc path)
+                        (pure mempty)
+                        pure
+                        filenames)
+  prettyPrintSummary counts
  where
   filenames :: MonadResource m => Stream (Of RawFilePath) m ()
   filenames = dirtree (pure . (/= '.') . BS.head) "."
 
   sloc :: MonadResource m => RawFilePath -> m (Map Filetype Int)
-  sloc path = fmap (M.singleton ft) $
+  sloc path = do
+    len <-
         S.length_
       . filterBlocks (isBeginBlockComment ft) (isEndBlockComment ft)
       . S.filter (not . isLineComment ft)
       . S.filter (not . BS.null)
       $ readFile path
-    where
-      ft :: Filetype
-      ft = filetype path
+
+    pure (M.singleton ft len)
+   where
+    ft :: Filetype
+    ft = filetype path
 
   prettyPrintSummary :: Map Filetype Int -> IO ()
   prettyPrintSummary =
@@ -62,28 +71,52 @@ filterBlocks isBegin isEnd s0 = do
 -- Filetype ADT and friends.
 
 data Filetype
-  = Haskell
+  = Cabal
   | CPlusPlus
+  | Haskell
+  | Markdown
+  | Yaml
   | Unknown
   deriving (Eq, Ord, Show)
 
 filetype :: RawFilePath -> Filetype
 filetype path
-  | ".hs"  `BS.isSuffixOf` path = Haskell
-  | ".cpp" `BS.isSuffixOf` path = CPlusPlus
-  | otherwise                   = Unknown
+  | ".cabal" `BS.isSuffixOf` path = Cabal
+  | ".cpp"   `BS.isSuffixOf` path = CPlusPlus
+  | ".hs"    `BS.isSuffixOf` path = Haskell
+  | ".md"    `BS.isSuffixOf` path = Markdown
+  | ".yaml"  `BS.isSuffixOf` path = Yaml
+  | otherwise                    = Unknown
 
 isLineComment :: Filetype -> ByteString -> Bool
-isLineComment Haskell   = BS.isPrefixOf "--"
-isLineComment CPlusPlus = BS.isPrefixOf "//"
-isLineComment _         = const False
+isLineComment Cabal     = begin "--"
+isLineComment CPlusPlus = begin "//"
+isLineComment Markdown  = none
+isLineComment Haskell   = begin "--"
+isLineComment Yaml      = begin "#"
+isLineComment Unknown   = none
 
 isBeginBlockComment :: Filetype -> ByteString -> Bool
-isBeginBlockComment Haskell   = BS.isPrefixOf "{-"
-isBeginBlockComment CPlusPlus = BS.isPrefixOf "/*"
-isBeginBlockComment _         = const False
+isBeginBlockComment Cabal     = none
+isBeginBlockComment CPlusPlus = begin "/*"
+isBeginBlockComment Markdown  = none
+isBeginBlockComment Haskell   = begin "{-"
+isBeginBlockComment Yaml      = none
+isBeginBlockComment Unknown   = none
 
 isEndBlockComment :: Filetype -> ByteString -> Bool
-isEndBlockComment Haskell   = BS.isSuffixOf "-}"
-isEndBlockComment CPlusPlus = BS.isSuffixOf "*/"
-isEndBlockComment _         = const False
+isEndBlockComment Cabal     = none
+isEndBlockComment CPlusPlus = end "*/"
+isEndBlockComment Markdown  = none
+isEndBlockComment Haskell   = end "-}"
+isEndBlockComment Yaml      = none
+isEndBlockComment Unknown   = none
+
+begin :: ByteString -> ByteString -> Bool
+begin = BS.isPrefixOf
+
+end :: ByteString -> ByteString -> Bool
+end = BS.isSuffixOf
+
+none :: ByteString -> Bool
+none _ = False
